@@ -1,6 +1,14 @@
 # PID.BAT
 Simple BAT script process management script 
 
+
+> [!TIP]
+> Do not include half-width spaces and parentheses in the path
+
+> [!WARNING]
+> This script cannot obtain the same running results on multiple computers, please pay attention to ensure the security of your data!
+> I am not responsible for your data security
+
 ## It can do?
 > Simple management of multitasking script processes  
 > Simple user system(beta) 
