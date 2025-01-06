@@ -6,8 +6,9 @@ Simple BAT script process management script
 > Do not include half-width spaces and parentheses in the path
 
 > [!WARNING]
-> This script cannot obtain the same running results on multiple computers, please pay attention to ensure the security of your data!
-> I am not responsible for your data security
+> This script cannot obtain the same running results on multiple computers, please pay attention to ensure the security of your data!  
+> **I am not responsible for the data on your hard drive!!**  
+> 本脚本未能在多个电脑获取同样运行结果，请注意保证你的数据安全！**我无法负责你硬盘上的数据!!**
 
 ## It can do?
 > Simple management of multitasking script processes  
