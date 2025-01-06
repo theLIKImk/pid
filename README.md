@@ -74,7 +74,7 @@ DEFAULT_USER=USER
 GLOBAL_CMD=
 ```
 
-##  Version\Change Log
+##  Version & Change Log
 Now version: **0.074.1145**
 > Added simple users, groups, permissions  
 > PID can be executed in any directory  
