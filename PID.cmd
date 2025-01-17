@@ -3,7 +3,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.074.1145
+set PM_VER=0.074.1147
 set PM_INFO=PID VER %PM_VER%
 
 set ZW=~dp0
@@ -22,9 +22,9 @@ if "%PIDMD_CMD_COLOR%"=="" (color 0F) else (color %PIDMD_CMD_COLOR%)
 
 :: DO NOT CHANG LANG STR
 set en_check_pid_info=INFO:
-set zh_check_pid_info=ÐÅÏ¢:
-set zh_use_arg_error_1=²»ÊÇÄÚ²¿»òÍâ²¿ÃüÁî£¬Ò²²»ÊÇ¿ÉÔËÐÐµÄ³ÌÐò
-set zh_use_arg_error_2=»òÅú´¦ÀíÎÄ¼þ¡£
+set zh_check_pid_info=ä¿¡æ¯:
+set zh_use_arg_error_1=ä¸æ˜¯å†…éƒ¨æˆ–å¤–éƒ¨å‘½ä»¤ï¼Œä¹Ÿä¸æ˜¯å¯è¿è¡Œçš„ç¨‹åº
+set zh_use_arg_error_2=æˆ–æ‰¹å¤„ç†æ–‡ä»¶ã€‚
 set en_use_arg_error_1=is not recognized as an internal or external command,
 set en_use_arg_error_2=operable program or batch file.
 
@@ -219,9 +219,9 @@ exit /b
 	
 	if not exist "%~dp0system.ini" (
 		call log.cmd PIDMD INFO CREATE:system.ini
-		echo [PIDMD]>"%~dp0system.ini¡±
-		echo LANG=zh>>"%~dp0system.ini¡°
-		echo CHCP_CODE=936>>"%~dp0system.ini¡±
+		echo [PIDMD]>"%~dp0system.iniâ€
+		echo LANG=zh>>"%~dp0system.iniâ€œ
+		echo CHCP_CODE=936>>"%~dp0system.iniâ€
 		echo CMD_COLOR=0F>>"%~dp0system.ini"
 		echo ROOT=%~dp0>>"%~dp0system.ini"
 		echo SYS=%symbol_1%PIDMD_ROOT%symbol_1%SYS\>>"%~dp0system.ini"
@@ -230,7 +230,7 @@ exit /b
 		echo SRV=%symbol_1%PIDMD_SYS%symbol_1%SRV\>>"%~dp0system.ini"
 		echo ALLUSER=%symbol_1%PIDMD_SYS%symbol_1%USER\>>"%~dp0system.ini"
 		echo ALLGROUP=%symbol_1%PIDMD_SYS%symbol_1%GROUP\>>"%~dp0system.ini"
-		echo DEFAULT_USER=USER>>"%~dp0system.ini"
+		echo DEFAULT_USER=SYSTEM>>"%~dp0system.ini"
 		echo GLOBAL_CMD=>>"%~dp0system.ini"
 	)
 
@@ -452,7 +452,7 @@ exit
 	call log.cmd PIDMD INFO @Hello,%PIDMD_DEFAULT_USER%!
 	echo.
 	SET PIDMD_USER=%PIDMD_DEFAULT_USER%
-	CALL %2
+	%2 %3 %4 %5 %6 %7 %8 %9
 	exit /b
 :main
 	set /p cml=%username%@%userdomain%\\%cd%^>
@@ -511,7 +511,8 @@ exit /b
 	call :exist_pid %2
 	if "%errorlevel%"=="1" (
 		call log.cmd PIDMD ERRO %2#SP#Not#SP#exist
-		if exist "%PIDMD_SYS%PID\*-%2" call log.cmd PIDMD ERRO -RMV-#SP#Clear#SP#file &del "%PIDMD_SYS%PID\*-%2"
+		if exist "%PIDMD_SYS%PID\*-%2" call log.cmd PIDMD ERRO -RMV-#SP#Clear#SP#PID#SP#file &del "%PIDMD_SYS%PID\*-%2"
+		IF DEFINED SRV call log.cmd PIDMD ERRO -RMV-#SP#Clear#SP#%SRV%#SP#file & del /F /S /Q "%PIDMD_SYS%\SRVRUN\%SRV%"
 		exit /b
 	)
 	
@@ -534,6 +535,7 @@ exit /b
 	
 	if /i "%1"=="/killpid-f" (taskkill /F /PID %2>nul) else (taskkill /PID %2>nul)
 	if /i "%TYPE%"=="SRV" del /F /S /Q "%PIDMD_SYS%\SRVRUN\%SRV%"
+	IF DEFINED SRV del /F /S /Q "%PIDMD_SYS%\SRVRUN\%SRV%"
 	del "%PIDMD_SYS%PID\*-%2" >nul
 	call log.cmd PIDMD INFO END#sp#PID#sp#%2#sp#[%PID_TYPE%]
 exit /b
