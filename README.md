@@ -99,6 +99,7 @@ Now version: **0.074.1145**
   <details>
   <summary>0.074.1146</summary>
     BUG fixes</br>
+    %PIDMD_DEFAULT_USER% set "SYSTEM" </br>
   </details>
   <details>
   <summary>0.074.1145</summary>
