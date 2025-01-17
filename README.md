@@ -92,6 +92,15 @@ Now version: **0.074.1145**
 > Other BUG fixes
 - ## History
   <details>
+  <summary>0.074.1147</summary>
+    Fixed the problem that the xxx.SRV file in the "%PIDMD_ROOT%\SYS\SRVRUN\" directory would not be deleted after the SRV specified process.</br>
+    Other BUG fixes</br>
+  </details>
+  <details>
+  <summary>0.074.1146</summary>
+    BUG fixes</br>
+  </details>
+  <details>
   <summary>0.074.1145</summary>
     Added simple users, groups, permissions</br>
     PID can be executed in any directory</br>
