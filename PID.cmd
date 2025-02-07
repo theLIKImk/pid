@@ -3,8 +3,9 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.074.1147
+set PM_VER=0.075.1
 set PM_INFO=PID VER %PM_VER%
+set PIDMD_DISABLE_RUN=false
 
 set ZW=~dp0
 set "symbol_1=%%"
@@ -30,10 +31,14 @@ set en_use_arg_error_2=operable program or batch file.
 
 %PIDMD_GLOBAL_CMD%
 
-if /i "%1"=="/run" goto startpg
-if /i "%1"=="/run-USR" goto startpg
-if /i "%1"=="/run-SYSTEM" goto startpg
-if /i "%1"=="/run-SRV" goto startpg
+if /i "%1"=="/start" goto start
+if /i "%1"=="/start-USR" goto start
+if /i "%1"=="/start-SYSTEM" goto start
+if /i "%1"=="/start-SRV" goto start
+if /i "%1"=="/run" goto run
+if /i "%1"=="/run-USR" goto run
+if /i "%1"=="/run-SYSTEM" goto run
+if /i "%1"=="/run-SRV" goto run
 if /i "%1"=="/check_pid" goto check_pid
 if /i "%1"=="/check_sys" goto check_sys
 if /i "%1"=="/exist-pid" goto exist_pid
@@ -129,6 +134,10 @@ echo.%PM_VER%
 exit /b
 
 :help
+	echo call pid /START {^<PID^>^|SOLO} ^<Path^>
+	echo call pid /START-USR {^<PID^>^|SOLO} ^<Path^>
+	echo call pid /START-SRV {^<PID^>^|SOLO} ^<Path^>
+	echo call pid /START-SYSTEM {^<PID^>^|SOLO} ^<Path^>
 	echo call pid /run ^<Path^>
 	echo call pid /run-USR ^<Path^>
 	echo call pid /run-SRV ^<SRV:name^> ^<SRV:cmd^>
@@ -232,6 +241,7 @@ exit /b
 		echo ALLGROUP=%symbol_1%PIDMD_SYS%symbol_1%GROUP\>>"%~dp0system.ini"
 		echo DEFAULT_USER=SYSTEM>>"%~dp0system.ini"
 		echo GLOBAL_CMD=>>"%~dp0system.ini"
+		echo DISABLE_RUN=false>>"%~dp0system.ini"
 	)
 
 goto :eof
@@ -540,7 +550,8 @@ exit /b
 	call log.cmd PIDMD INFO END#sp#PID#sp#%2#sp#[%PID_TYPE%]
 exit /b
 
-:startpg
+:run
+	if /i "%PIDMD_DISABLE_RUN%"=="true" exit /b -2
 	if "%2"=="" exit /b
 	
 	set PID_TYPE=USR
@@ -586,6 +597,7 @@ exit /b
 		echo GROUP=SYS>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo SRV=%2>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo COMVAL=%4 %5 %6 %7 %8 %9>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+		echo RELY_ON=SOLO>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo %PG_PID%>"%PIDMD_SYS%SRVRUN\%2"
 	) else (
 		call log.cmd PIDMD INFO RUN#sp#%2#SP#in#SP#%PG_PID%
@@ -595,11 +607,103 @@ exit /b
 		echo USER=%PIDMD_USER%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo GROUP=SYS>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo COMVAL=%3 %4 %5 %6 %7 %8 %9>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+		echo RELY_ON=SOLO>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 	)
 	
 	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE%
 	popd
 exit /b
+
+
+:start
+	if /i not "%2"=="SOLO" (
+		if not exist "%PIDMD_ROOT%SYS\PID\*-%2" (
+			CALL :LOG-ERRO Rely on pid[%2] not exist
+			exit /b
+		)
+	)
+	
+	if DEFINED PID_START_PATH_SET (cpretpid %PID_START_PATH_SET%) else 	(
+		if not "%3"=="" (cpretpid %3 %4 %5 %6 %7 %8 %9) else (CALL :LOG-ERRO Path not set & exit /b -1)
+	)
+
+	set PG_PID=%errorlevel%
+	SET PG_NAME=%3
+	SET PID_TYPE=USR
+	SET SRV=%3
+	IF /I "%1"=="/START-USR" SET PID_TYPE=USR
+	IF /I "%1"=="/START-SRV" SET PID_TYPE=SRV
+	IF /I "%1"=="/START-SYSTEM" SET PID_TYPE=SYSTEM
+	
+	if "%PG_PID%"=="0" CALL :LOG-ERRO Create fail & exit /b -1
+	
+	goto SET_PID_FILE
+
+:SET_PID_FILE
+	echo PID=%PG_PID%>"%PIDMD_ROOT%SYS\PID\%3-%PG_PID%"
+	echo NAME=%3>>"%PIDMD_ROOT%SYS\PID\%3-%PG_PID%"
+	echo TYPE=%PID_TYPE%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+	echo USER=%PIDMD_USER%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+	
+	echo GROUP=SYS>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+	IF /I "%1"=="/START-SRV" echo SRV=%3>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+	
+	if DEFINED PID_START_PATH_SET (
+			echo COMVAL=%PID_START_PATH_SET%>>"%PIDMD_ROOT%SYS\PID\%3-%PG_PID%"
+		) else (
+			echo COMVAL=%4 %5 %6 %7 %8>>"%PIDMD_ROOT%SYS\PID\%3-%PG_PID%"
+		)
+		echo RELY_ON=%2>>"%PIDMD_ROOT%SYS\PID\%3-%PG_PID%"
+	)
+	
+	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE%
+	
+	set PID_START_PATH_SET=
+	SET PID_RUN_PATH_SET=
+	
+	exit /b %PG_PID%
+
+:LOGHE-INFO
+	SET _LOG_STR=%*
+	SET _LOG_STR=%_LOG_STR: =#sp#%
+	CALL LOGHE.CMD PIDMD INFO %_LOG_STR%
+	SET _LOG_STR=
+EXIT /B
+
+:LOGHE-WARN
+	SET _LOG_STR=%*
+	SET _LOG_STR=%_LOG_STR: =#sp#%
+	CALL LOGHE.CMD PIDMD WARN %_LOG_STR%
+	SET _LOG_STR=
+EXIT /B
+
+:LOGHE-ERRO
+	SET _LOG_STR=%*
+	SET _LOG_STR=%_LOG_STR: =#sp#%
+	CALL LOGHE.CMD PIDMD ERRO %_LOG_STR%
+	SET _LOG_STR=
+EXIT /B
+
+:LOG-INFO
+	SET _LOG_STR=%*
+	SET _LOG_STR=%_LOG_STR: =#sp#%
+	CALL LOG.CMD PIDMD INFO %_LOG_STR%
+	SET _LOG_STR=
+EXIT /B
+
+:LOG-WARN
+	SET _LOG_STR=%*
+	SET _LOG_STR=%_LOG_STR: =#sp#%
+	CALL LOG.CMD PIDMD WARN %_LOG_STR%
+	SET _LOG_STR=
+EXIT /B
+
+:LOG-ERRO
+	SET _LOG_STR=%*
+	SET _LOG_STR=%_LOG_STR: =#sp#%
+	CALL LOG.CMD PIDMD ERRO %_LOG_STR%
+	SET _LOG_STR=
+EXIT /B
 
 :exist_pid
 ::call :exist_pid [PID]
@@ -685,7 +789,6 @@ exit /b
 		PUSHD "%CD%"
 		CD /D "%PIDMD_SYS%PID\"
 		for /r %%f in (SYSTEM_PID-*) do call loadcfg "%%~nxf"
-		echo %NAME%[%PID%]
 		call log.cmd PIDMD DOWN %NAME%[%PID%]
 		set SYS_PID=%PID%
 		POPD
