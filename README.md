@@ -18,7 +18,8 @@ Simple BAT script process management script
 ## All command
 | Command | info |
 | -------------- | ------------------------ |
-| `call pid /run <Path>` | Run the program in a new window and create the corresponding file in `#PID.BAT DIR#\SYS\PID` |  
+| `call pid /start {<PID>\|SOLO} <path>` <br> `call pid /start-USR {<PID>\|SOLO} <path>` <br> `call pid /start-SRV {<PID>\|SOLO} <path>` <br> `call pid /start-START {<PID>\|SOLO} <path>` | Create separate processes and subprocesses |  
+| `call pid /run <Path> ` | Run the program in a new window and create the corresponding file in `#PID.BAT DIR#\SYS\PID` |  
 | `call pid /run-USR <Path>` | (by User)Run the program in a new window and create the corresponding file in `#PID.BAT DIR#\SYS\PID` |  
 | `call pid /run-SRV <SRV:name> <SRV:cmd>` | (by service)Run the program in a new window and create the corresponding file in `#PID.BAT DIR#\SYS\PID` |  
 | `call pid /run-SYSTEM <Path>` | (by system/root)Run the program in a new window and create the corresponding file in `#PID.BAT DIR#\SYS\PID` |  
@@ -85,27 +86,34 @@ GLOBAL_CMD=
 ```
 
 ##  Version & Change Log
-Now version: **0.074.1145**
-> Added simple users, groups, permissions  
-> PID can be executed in any directory  
-> PIDMD_ROOT can be set arbitrarily  
-> Other BUG fixes
-- ## History
-  <details>
+<details>
+  <summary>0.075.1</summary>
+  
+  > Subprocess support <br>
+  > Add setting entry `PIDMD_DISABLE_RUN` (default value **FALSE**)
+  > Other BUG fixes
+</details>
+
+<details>
   <summary>0.074.1147</summary>
-    Fixed the problem that the xxx.SRV file in the "%PIDMD_ROOT%\SYS\SRVRUN\" directory would not be deleted after the SRV specified process.</br>
-    Other BUG fixes</br>
-  </details>
-  <details>
+  
+  > Fixed the problem that the **xxx.SRV** file in the `%PIDMD_ROOT%\SYS\SRVRUN\` directory would not be deleted after the SRV specified process.<br>
+  > Other BUG fixes
+</details>
+
+<details>
   <summary>0.074.1146</summary>
-    BUG fixes</br>
-    %PIDMD_DEFAULT_USER% set "SYSTEM" </br>
-  </details>
-  <details>
+  
+  > BUG fixes<br>
+  > `%PIDMD_DEFAULT_USER%` set `SYSTEM`
+</details>
+
+<details>
   <summary>0.074.1145</summary>
-    Added simple users, groups, permissions</br>
-    PID can be executed in any directory</br>
-    PIDMD_ROOT can be set arbitrarily</br>
-    Other BUG fixes</br>
-  </details>
+  
+  > Added simple users, groups, permissions<br>
+  > PID can be executed in any directory<br>
+  > `PIDMD_ROOT` can be set arbitrarily<br>
+  > Other BUG fixes
+</details>
 
