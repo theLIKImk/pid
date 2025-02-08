@@ -1,6 +1,6 @@
 # PID.BAT
 Simple BAT script process management script 
-
+It can help you manage multiple BAT script windows
 
 > [!TIP]
 > Do not include half-width spaces and parentheses in the path  
