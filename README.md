@@ -87,11 +87,19 @@ GLOBAL_CMD=
 
 ##  Version & Change Log
 <details>
+  <summary>0.075.2</summary>
+  
+  > Fixed the problem that closing the parent process and the child process will not end <br>
+  > Fixed `/start-srv` ending immediately after running <br>
+  > Other BUG fixes 
+</details>
+
+<details>
   <summary>0.075.1</summary>
   
   > Subprocess support <br>
-  > Add setting entry `PIDMD_DISABLE_RUN` (default value **FALSE**)
-  > Other BUG fixes
+  > Add setting entry `PIDMD_DISABLE_RUN` (default value **FALSE**) <br>
+  > Other BUG fixes 
 </details>
 
 <details>
