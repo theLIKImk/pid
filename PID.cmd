@@ -3,7 +3,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.1
+set PM_VER=0.075.2
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -610,9 +610,9 @@ exit /b
 		echo RELY_ON=SOLO>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 	)
 	
-	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE%
+	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% SOLO
 	popd
-exit /b
+exit /b %PG_PID%
 
 
 :start
@@ -628,6 +628,7 @@ exit /b
 	)
 
 	set PG_PID=%errorlevel%
+	set PID_RELY_ON=%2
 	SET PG_NAME=%3
 	SET PID_TYPE=USR
 	SET SRV=%3
@@ -656,7 +657,9 @@ exit /b
 		echo RELY_ON=%2>>"%PIDMD_ROOT%SYS\PID\%3-%PG_PID%"
 	)
 	
-	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE%
+	IF /I "%PID_TYPE%"=="SRV" ECHO.%PG_PID%>"%PIDMD_SYS%SRVRUN\%SRV%"
+	
+	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% %PID_RELY_ON%
 	
 	set PID_START_PATH_SET=
 	SET PID_RUN_PATH_SET=
@@ -720,7 +723,7 @@ exit /b 0
 	set PG_PID=%2
 	set PG_NAME=%3
 	set PID_TYPE=%4
-	set SRV_NAME=%5
+	set PID_RELY_ON=%5
 	
 	if /i "%PID_TYPE%"=="SYSTEM" (
 		title PIDSYS %PG_NAME% %PG_PID%
@@ -732,7 +735,14 @@ exit /b 0
 	echo %PG_PID% %PG_NAME% %PID_TYPE%
 	call log.cmd PIDMD INFO PC-%PG_PID%,RUN:%PG_PID%,NAME:%PG_NAME%,TYPE:%PID_TYPE%
 	:check_pid_looop
-		REM call log.cmd PIDMD PC-%PG_PID%-INFO check
+		
+		if /i not "%PID_RELY_ON%"=="SOLO" (
+			IF NOT EXIST "%PIDMD_ROOT%SYS\PID\*-%PID_RELY_ON%" (
+				start hiderun call PID.cmd /killpid-f %PG_PID%
+				exit /b
+			)
+		)
+		
 		echo [FILE]
 		if not exist "%PIDMD_SYS%PID\*-%2" (
 			call log.cmd PIDMD INFO PC-%PG_PID%,FILE#SP#END,GOOD#SP#BEY
