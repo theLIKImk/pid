@@ -1,5 +1,5 @@
 # PID.BAT
-Simple BAT script process management script 
+Simple BAT script process management script  
 It can help you manage multiple BAT script windows
 
 > [!TIP]
