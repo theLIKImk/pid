@@ -3,7 +3,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.2
+set PM_VER=0.075.3
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -68,9 +68,14 @@ if /i "%1"=="/log" goto log
 if /i "%1"=="/title" goto title
 if /i "%1"=="/help" goto help
 if /i "%1"=="/version" goto version
+if /i "%1"=="/ABOUT" goto ABOUT
 
 exit /b
 
+:ABOUT
+	ECHO Github: https://github.com/theLIKImk/pid
+	ECHO /!\ This project follows the GPL-3.0 license
+EXIT /B
 
 :GROUP
 	if /i "%1"=="/group-list" (
@@ -167,6 +172,7 @@ exit /b
 	echo call pid /title
 	echo call pid /help
 	echo call pid /version
+	echo call pid /about
 	echo.
 	echo.v%PM_VER%
 	echo.
@@ -197,7 +203,7 @@ exit /b
 		call log.cmd PIDMD INFO --CREATE#SP#^|#SP#start.bat--
 		echo @echo off>"%~dp0start.bat"
 		echo :: START ^<PATH^>>>"%~dp0start.bat"
-		echo call pid /run %%%**>>"%~dp0start.bat"
+		echo call pid /start solo %%%**>>"%~dp0start.bat"
 		echo exit /b>>"%~dp0start.bat"
 	)
 	
@@ -301,7 +307,8 @@ EXIT /B
 	
 	call log.cmd PIDMD INFO Run#SP#SRV#SP#%SRV_NAME%
 	call loadcfg "%PIDMD_SYS%SRV\%SRV_NAME%"
-	start hiderun PID.CMD /run-SRV %SRV_NAME% %CMD%
+	SET PID_START_PATH_SET=%CMD%
+	start hiderun PID.CMD /start-SRV SOLO %SRV_NAME%
 EXIT /B
 
 :SRV_INFO
@@ -372,7 +379,7 @@ exit /b
 		echo.TYPE=SYS>>"%PIDMD_SYS%SRV\timestop.srv"
 		echo.USE=TRUE>>"%PIDMD_SYS%SRV\timestop.srv"
 		echo.>>"%PIDMD_SYS%SRV\timestop.srv"
-		echo.RELOAD_CMD=CALL PID /RUN-SYSTEM timestop.bat /SERVER-STOP #NL# CALL PID /RUN-SYSTEM timestop.bat /SERVER-HIDE>>"%PIDMD_SYS%SRV\timestop.srv"
+		echo.RELOAD_CMD=CALL PID /start-SYSTEM solo timestop.bat /SERVER-STOP #NL# CALL PID /start-SYSTEM solo timestop.bat /SERVER-HIDE>>"%PIDMD_SYS%SRV\timestop.srv"
 		echo.STOP_CMD=timestop.bat /SERVER-STOP>>"%PIDMD_SYS%SRV\timestop.srv"
 		echo.>>"%PIDMD_SYS%SRV\timestop.srv"
 		echo.INFO=timestop server>>"%PIDMD_SYS%SRV\timestop.srv"
@@ -488,25 +495,35 @@ exit /b
 
 :info
 	SET NAME=
-	SET PID=
-	SET COMVAL=
+	SET SRV=
+	
+	PUSHD "%CD%"
+	CD /D "%PIDMD_SYS%PID"
 	
 	if /i "%1"=="/info-p" (
-		for /r %%f in (%PIDMD_SYS%PID\*-%2) do (
+		for /r %%f in (*-%2) do (
 			call loadcfg "%PIDMD_SYS%PID\%%~nxf"
 		)
 	)
 	if /i "%1"=="/info-n" (
-		for /r %%f in (%PIDMD_SYS%PID\%2-*) do (
+		for /r %%f in (%2-*) do (
 			call loadcfg "%PIDMD_SYS%PID\%%~nxf"
 		)
 	)
 	
+	POPD
+	
 	IF "%NAME%"=="" ECHO NOT EXIST & EXIT /B
 	
 	echo Name:%NAME%
+	IF NOT "%SRV%"=="" echo SRV:%SRV%
+	echo.
 	echo PID:%PID%
-	echo CMD:%NAME% %COMVAL%
+	echo CMD:%COMVAL%
+	echo TYPE:%TYPE%
+	echo FROM USER:%USER%
+	echo RELY ON PID:%RELY_ON%
+	
 exit /b
 
 :list
@@ -616,6 +633,26 @@ exit /b %PG_PID%
 
 
 :start
+	if /i "%PIDMD_BOOT%"=="true" (
+		if /i "%1"=="/start-SRV" (
+			IF NOT EXIST "%PIDMD_ALLGROUP%ROOT\%PIDMD_USER%" (
+				CALL :LOG-ERRO User %PIDMD_USER% does not have permissions[%2-%3]
+				EXIT /B
+			) ELSE (
+				set PID_TYPE=SRV
+				set SRV=%2
+			)
+		)
+		if /i "%1"=="/start-SYSTEM" (
+			IF NOT EXIST "%PIDMD_ALLGROUP%ROOT\%PIDMD_USER%" (
+				CALL :LOG-ERRO User %PIDMD_USER% does not have permissions[%2]
+				EXIT /B
+			) ELSE (
+				set PID_TYPE=SYSTEM
+			)
+		)
+	)
+	
 	if /i not "%2"=="SOLO" (
 		if not exist "%PIDMD_ROOT%SYS\PID\*-%2" (
 			CALL :LOG-ERRO Rely on pid[%2] not exist
