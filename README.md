@@ -48,6 +48,7 @@ It can help you manage multiple BAT script windows
 | `call pid /title` | Print management mode LOGO |
 | `call pid /help` | Print command list |
 | `call pid /version` | Version |
+| `call pid /about` | About |
 
 ## .srv File `#PID.BAT DIR#\SYS\SRV`
 ```
@@ -86,6 +87,14 @@ GLOBAL_CMD=
 ```
 
 ##  Version & Change Log
+<details>
+  <summary>0.075.3</summary>
+  
+  > Fixed `/info`<br>
+  > Add `/about` <br>
+  > Other BUG fixes 
+</details>
+
 <details>
   <summary>0.075.2</summary>
   
