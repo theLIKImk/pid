@@ -3,7 +3,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.3
+set PM_VER=0.075.4
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -64,15 +64,28 @@ if /i "%1"=="/group-add" goto GROUP
 if /i "%1"=="/group-rmv" goto GROUP
 if /i "%1"=="/group-setuser" goto GROUP
 if /i "%1"=="/group-rmuser" goto GROUP
+if /i "%1"=="/SYSTEM_PID-PID" goto SYSTEM_PID
+if /i "%1"=="/SYSTEM_PID-STATUS" goto :SYSTEM_PID
 if /i "%1"=="/log" goto log
 if /i "%1"=="/title" goto title
 if /i "%1"=="/help" goto help
 if /i "%1"=="/version" goto version
 if /i "%1"=="/ABOUT" goto ABOUT
+if /i "%1"=="/ABOUT-GPL" goto ABOUT
+if /i "%1"=="test" goto test
 
 exit /b
 
+:SYSTEM_PID
+	IF /I NOT "%PIDMD_BOOT%"=="TRUE" ECHO NOT BOOT & EXIT /B
+	IF /I "%1"=="/SYSTEM_PID-PID" ECHO.%PIDMD_SYSTEM_PID% & EXIT /B
+	IF /I "%1"=="/SYSTEM_PID-STATUS" TYPE "%PIDMD_SYS%PID\SYSTEM_PID-%PIDMD_SYSTEM_PID%" & EXIT /B
+	
+EXIT /B
+
+
 :ABOUT
+	IF /I "%1"=="/ABOUT-GPL" TYPE "%PIDMD_ROOT%LICENSE" & exit /b
 	ECHO Github: https://github.com/theLIKImk/pid
 	ECHO /!\ This project follows the GPL-3.0 license
 EXIT /B
@@ -168,11 +181,14 @@ exit /b
 	echo call pid /group-rmv ^<GROUP^>
 	echo call pid /group-setuser ^<USERNAME^> ^<GROUP^>
 	echo call pid /group-rmuser ^<USERNAME^> ^<GROUP^>
+	echo call pid /system_pid-pid
+	echo call pid /system_pid-status
 	echo call pid /log
 	echo call pid /title
 	echo call pid /help
 	echo call pid /version
 	echo call pid /about
+	echo call pid /about-gpl
 	echo.
 	echo.v%PM_VER%
 	echo.
@@ -194,7 +210,7 @@ exit /b
 		echo @echo off>"%~dp0hiderun.cmd"
 		echo TITLE HIDERUN>>"%~dp0hiderun.cmd"
 		echo ::HIDERUN ^<CMD^>>>"%~dp0hiderun.cmd"
-		echo hidecon>>"%~dp0hiderun.cmd"
+		echo hidew>>"%~dp0hiderun.cmd"
 		echo %%%** exit /b>>"%~dp0hiderun.cmd"
 		echo exit>>"%~dp0hiderun.cmd"
 	)
@@ -234,9 +250,9 @@ exit /b
 	
 	if not exist "%~dp0system.ini" (
 		call log.cmd PIDMD INFO CREATE:system.ini
-		echo [PIDMD]>"%~dp0system.ini”
-		echo LANG=zh>>"%~dp0system.ini“
-		echo CHCP_CODE=936>>"%~dp0system.ini”
+		echo [PIDMD]>"%~dp0system.ini"
+		echo LANG=zh>>"%~dp0system.ini"
+		echo CHCP_CODE=936>>"%~dp0system.ini"
 		echo CMD_COLOR=0F>>"%~dp0system.ini"
 		echo ROOT=%~dp0>>"%~dp0system.ini"
 		echo SYS=%symbol_1%PIDMD_ROOT%symbol_1%SYS\>>"%~dp0system.ini"
@@ -248,6 +264,8 @@ exit /b
 		echo DEFAULT_USER=SYSTEM>>"%~dp0system.ini"
 		echo GLOBAL_CMD=>>"%~dp0system.ini"
 		echo DISABLE_RUN=false>>"%~dp0system.ini"
+		echo STARTUP_STALLED=FALSE>>"%~dp0system.ini"
+		echo STARTUP_STALLED_TIME=5>>"%~dp0system.ini"
 	)
 
 goto :eof
@@ -331,8 +349,25 @@ exit /b
 exit /b
 
 :test
-pause
-exit /b
+	REM ECHO %pidmd_test%
+	if "%pidmd_test%"=="0" echo test
+	if "%pidmd_test%"=="1" echo test
+	if "%pidmd_test%"=="2" echo test
+	if "%pidmd_test%"=="3" echo test
+	if "%pidmd_test%"=="4" echo test
+	if "%pidmd_test%"=="5" echo test
+	if "%pidmd_test%"=="6" echo test
+	if "%pidmd_test%"=="7" echo test
+	if "%pidmd_test%"=="8" echo test
+	if "%pidmd_test%"=="9" echo test
+	if "%pidmd_test%"=="10" echo test
+	if "%pidmd_test%"=="11" echo just test!
+	if "%pidmd_test%"=="12" echo Hey(#'O′)
+	if %pidmd_test% GTR 12 echo There's something wrong with your designation
+	
+	echo.>test
+	set /a pidmd_test+=1
+exit /b 114514
 
 :boot
 	title -- BOOT --
@@ -410,20 +445,24 @@ exit /b
 	
 	if not exist "%PIDMD_TMP%PID" mkdir "%PIDMD_TMP%PID"
 	if not exist "%PIDMD_SYS%USER" (
+		call :LOG-INFO CREATE USER
 		mkdir "%PIDMD_SYS%USER" 
 		ECHO.>"%PIDMD_SYS%USER\SYSTEM"
 		ECHO.>"%PIDMD_SYS%USER\USER"
 	)
 
 	if not exist "%PIDMD_SYS%GROUP" (
+		call :LOG-INFO CREATE GROUP
 		mkdir "%PIDMD_SYS%GROUP"
 		mkdir "%PIDMD_SYS%GROUP\ROOT"
 		ECHO.>"%PIDMD_SYS%GROUP\ROOT\SYSTEM"
 	)
 	
 	call log.cmd PIDMD BOOT --#sp#LOAD#sp#SET#sp#--
-
 	call loadcfg system.ini
+	
+	CALL :LOG-INFO --ALL OK---
+	IF /I "%PIDMD_STARTUP_STALLED%"=="TRUE" (timeout %PIDMD_STARTUP_STALLED_TIME% >nul)
 	
 	call log.cmd PIDMD BOOT --#SP#BOOT#SP#--
 	
@@ -444,7 +483,13 @@ exit /b
 	start hiderun PID.cmd /check_sys %PG_PID%
 exit
 
+:startup-getpidmdInfo
+	CALL LOADCFG "%PIDMD_SYS%PID\SYSTEM_PID-*"
+	SET PIDMD_SYSTEM_PID=%PID%
+exit /b
+
 :startup
+	IF EXIST "%PIDMD_SYS%PID\SYSTEM_PID-*" CALL :startup-getpidmdInfo
 	
 	if /i "%PIDMD_BOOT%"=="true" (
 		title -- PID MANAGER MODE ^| %PM_INFO% --
