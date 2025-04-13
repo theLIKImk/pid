@@ -44,11 +44,14 @@ It can help you manage multiple BAT script windows
 | `call pid /group-rmv <GROUP>` | Group add remove |
 | `call pid /group-setuser <USERNAME> <GROUP>` | Set the users to be added to the group |
 | `call pid /group-rmuser <USERNAME> <GROUP>` | Set the users to be removed from the group |
+| `call pid /system_pid-pid` | Get SYSTEM_PID
+| `call pid /system_pid-status` | TYPE `#PID.BAT DIR#\SYS\PID\SYSTEM_PID-xxxxxx` |
 | `call pid /log` | Print PID process log(`#PID.BAT DIR#\SYS\LOG\PIDMD.LOG`)
 | `call pid /title` | Print management mode LOGO |
 | `call pid /help` | Print command list |
 | `call pid /version` | Version |
 | `call pid /about` | About |
+| `call pid /about-gpl` | GPL 3.0 |
 
 ## .srv File `#PID.BAT DIR#\SYS\SRV`
 ```
@@ -87,6 +90,16 @@ GLOBAL_CMD=
 ```
 
 ##  Version & Change Log
+
+<details>
+  <summary>0.075.4</summary>
+  
+  > Add `/SYSTEM_PID-PID` <br>
+  > Add `/SYSTEM_PID-STATUS` <br>
+  > Add `/ABOUT-GPL` <br>
+  > Other BUG fixes 
+</details>
+
 <details>
   <summary>0.075.3</summary>
   
