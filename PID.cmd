@@ -3,7 +3,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.4
+set PM_VER=0.075.5
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -266,6 +266,7 @@ exit /b
 		echo DISABLE_RUN=false>>"%~dp0system.ini"
 		echo STARTUP_STALLED=FALSE>>"%~dp0system.ini"
 		echo STARTUP_STALLED_TIME=5>>"%~dp0system.ini"
+		echo END_CLEAR=FALSE>>"%~dp0system.ini"
 	)
 
 goto :eof
@@ -917,6 +918,8 @@ exit /b
 	
 	start hiderun call PID.cmd /killpid-f %SYS_PID%
 	
+	IF /i "%PIDMD_END_CLEAR%"=="false" goto :SYS_END-out
+	
 	call log.cmd PIDMD DOWN --#sp#Clear#sp#PIDCHECK#sp#--
 	for /F "tokens=1,2,3,4,5,6,7,8,9 delims=," %%1 in ('tasklist.exe /v /fo csv ^| findstr /i "PIDCHECK"') do (
 		call :sys_kill_pidcheck %%2
@@ -927,8 +930,7 @@ exit /b
 		call :sys_kill_pidcheck %%2
 	)
 
-	
-
+	:SYS_END-out
 	rem del /f /s /q tmp\*
 	del /f /s /q "%PIDMD_TMP%\PIDMD-END"
 	call log.cmd PIDMD DOWN --BEY--
