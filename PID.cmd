@@ -3,7 +3,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.5
+set PM_VER=0.075.6
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -267,6 +267,7 @@ exit /b
 		echo STARTUP_STALLED=FALSE>>"%~dp0system.ini"
 		echo STARTUP_STALLED_TIME=5>>"%~dp0system.ini"
 		echo END_CLEAR=FALSE>>"%~dp0system.ini"
+		echo CHECK_PATH=TRUE>>"%~dp0system.ini"
 	)
 
 goto :eof
@@ -370,6 +371,22 @@ exit /b
 	set /a pidmd_test+=1
 exit /b 114514
 
+:boot-CHECK_PATH-CUT
+	SET PIDMD_TEMP_C1=%1
+	SET PIDMD_TEMP_C2=%2
+EXIT /B
+
+:boot-CHECK_PATH
+	SET PIDMD_TEMP_PATH=%~DP0
+	SET PIDMD_TEMP_PATH=[%PIDMD_TEMP_PATH%]
+	SET PIDMD_TEMP_PATH=%PIDMD_TEMP_PATH:!= %
+	SET PIDMD_TEMP_PATH=%PIDMD_TEMP_PATH:"= %
+	SET PIDMD_TEMP_PATH=%PIDMD_TEMP_PATH:(= %
+	SET PIDMD_TEMP_PATH=%PIDMD_TEMP_PATH:)= %
+	call :boot-CHECK_PATH-CUT %PIDMD_TEMP_PATH%
+	IF NOT "%PIDMD_TEMP_C2%"=="" CALL :LOG-ERRO ERROR PATH %~DP0 & PAUSE & EXIT
+EXIT /B
+
 :boot
 	title -- BOOT --
 	call log.cmd PIDMD BOOT #sp##sp##sp#___#sp##sp#__#sp##sp#__#sp##sp##sp##sp##sp#_#sp##sp#_#sp##sp#__
@@ -382,6 +399,10 @@ exit /b 114514
 		call log.cmd PIDMD BOOT Is#SP#runing
 		exit /b
 	)
+	
+	call log.cmd PIDMD BOOT --#SP#CHECK#SP#ENV#SP#--
+	
+	IF /I NOT "%PIDMD_CHECK_PATH%"=="FALSE" CALL :boot-CHECK_PATH
 	
 	call log.cmd PIDMD BOOT --#SP#SET#SP#FILE#SP#--
 	if not exist "%PIDMD_SYS%SRV\" (
