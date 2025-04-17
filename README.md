@@ -92,6 +92,13 @@ GLOBAL_CMD=
 ##  Version & Change Log
 
 <details>
+  <summary>0.075.6</summary>
+  
+  > Add `CHECK_PATH` Setting<br>
+  > Other BUG fixes 
+</details>
+
+<details>
   <summary>0.075.5</summary>
   
   > Add `END_CLEAR` Setting<br>
