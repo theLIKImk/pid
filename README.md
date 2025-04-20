@@ -44,6 +44,7 @@ It can help you manage multiple BAT script windows
 | `call pid /group-rmv <GROUP>` | Group add remove |
 | `call pid /group-setuser <USERNAME> <GROUP>` | Set the users to be added to the group |
 | `call pid /group-rmuser <USERNAME> <GROUP>` | Set the users to be removed from the group |
+| `call pid /config-load` | Load system.ini |
 | `call pid /system_pid-pid` | Get SYSTEM_PID
 | `call pid /system_pid-status` | TYPE `#PID.BAT DIR#\SYS\PID\SYSTEM_PID-xxxxxx` |
 | `call pid /log` | Print PID process log(`#PID.BAT DIR#\SYS\LOG\PIDMD.LOG`)
@@ -90,6 +91,15 @@ GLOBAL_CMD=
 ```
 
 ##  Version & Change Log
+
+<details>
+  <summary>0.075.7</summary>
+  
+  > Fix srv cant reload <br>
+  > Add `/CONFIG-LOAD`<br>
+  > Speed ​​optimization<br>
+  > Other BUG fixes 
+</details>
 
 <details>
   <summary>0.075.6</summary>
