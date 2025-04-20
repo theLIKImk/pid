@@ -3,7 +3,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.6
+set PM_VER=0.075.7
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -12,7 +12,8 @@ set "symbol_1=%%"
 
 call :check_file
 
-call loadcfg "%~dp0system.ini"
+IF /I NOT "%PIDMD_CONFIG_LOADED%"=="TRUE" call loadcfg "%~dp0system.ini"
+SET PIDMD_CONFIG_LOADED=TRUE
 
 if not exist "%PIDMD_SYS%\PID\" mkdir "%PIDMD_SYS%\PID\"
 
@@ -65,7 +66,8 @@ if /i "%1"=="/group-rmv" goto GROUP
 if /i "%1"=="/group-setuser" goto GROUP
 if /i "%1"=="/group-rmuser" goto GROUP
 if /i "%1"=="/SYSTEM_PID-PID" goto SYSTEM_PID
-if /i "%1"=="/SYSTEM_PID-STATUS" goto :SYSTEM_PID
+if /i "%1"=="/SYSTEM_PID-STATUS" goto SYSTEM_PID
+if /i "%1"=="/CONFIG-LOAD" goto CONFIG
 if /i "%1"=="/log" goto log
 if /i "%1"=="/title" goto title
 if /i "%1"=="/help" goto help
@@ -75,6 +77,14 @@ if /i "%1"=="/ABOUT-GPL" goto ABOUT
 if /i "%1"=="test" goto test
 
 exit /b
+
+:CONFIG
+	IF /I "%1"=="/CONFIG-LOAD" GOTO CONFIG_LOAD
+EXIT /B
+
+:CONFIG_LOAD
+	call loadcfg "%~dp0system.ini"
+EXIT /B
 
 :SYSTEM_PID
 	IF /I NOT "%PIDMD_BOOT%"=="TRUE" ECHO NOT BOOT & EXIT /B
@@ -148,7 +158,7 @@ EXIT /B
 EXIT /B
 
 :version
-echo.%PM_VER%
+	echo.%PM_VER%
 exit /b
 
 :help
@@ -181,6 +191,7 @@ exit /b
 	echo call pid /group-rmv ^<GROUP^>
 	echo call pid /group-setuser ^<USERNAME^> ^<GROUP^>
 	echo call pid /group-rmuser ^<USERNAME^> ^<GROUP^>
+	echo call pid /config-load
 	echo call pid /system_pid-pid
 	echo call pid /system_pid-status
 	echo call pid /log
@@ -296,7 +307,9 @@ EXIT /B
 	
 	SET RELOAD_CMD=
 	call loadcfg "%PIDMD_SYS%SRV\%SRV_NAME%"
-	if DEFINED RELOAD_CMD (%RELOAD_CMD:#NL#=&% & exit /b)
+	if DEFINED RELOAD_CMD (
+		echo.>nul &%RELOAD_CMD:#NL#=&%& exit /b
+	)
 	
 	CALL :SRV_STOP
 	CALL :SRV_START
@@ -384,10 +397,11 @@ EXIT /B
 	SET PIDMD_TEMP_PATH=%PIDMD_TEMP_PATH:(= %
 	SET PIDMD_TEMP_PATH=%PIDMD_TEMP_PATH:)= %
 	call :boot-CHECK_PATH-CUT %PIDMD_TEMP_PATH%
-	IF NOT "%PIDMD_TEMP_C2%"=="" CALL :LOG-ERRO ERROR PATH %~DP0 & PAUSE & EXIT
+	IF NOT "%PIDMD_TEMP_C2%"=="" COLOR 40 & CALL :LOG-ERRO ERROR PATH %~DP0 & PAUSE & EXIT
 EXIT /B
 
 :boot
+	::call PID /CONFIG-LOAD
 	title -- BOOT --
 	call log.cmd PIDMD BOOT #sp##sp##sp#___#sp##sp#__#sp##sp#__#sp##sp##sp##sp##sp#_#sp##sp#_#sp##sp#__
 	call log.cmd PIDMD BOOT #sp##sp#/__/#sp##sp#/#sp##sp#/#sp##sp#\#sp##sp##sp#/#sp#/#sp#/#sp#/#sp##sp#\
@@ -481,7 +495,6 @@ EXIT /B
 	)
 	
 	call log.cmd PIDMD BOOT --#sp#LOAD#sp#SET#sp#--
-	call loadcfg system.ini
 	
 	CALL :LOG-INFO --ALL OK---
 	IF /I "%PIDMD_STARTUP_STALLED%"=="TRUE" (timeout %PIDMD_STARTUP_STALLED_TIME% >nul)
