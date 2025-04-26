@@ -86,11 +86,22 @@ LOG=%PIDMD_SYS%LOG\
 SRV=%PIDMD_SYS%SRV\
 ALLUSER=%PIDMD_SYS%USER\
 ALLGROUP=%PIDMD_SYS%GROUP\
-DEFAULT_USER=USER
+DEFAULT_USER=SYSTEM
 GLOBAL_CMD=
+DISABLE_RUN=FALSE
+STARTUP_STALLED=TRUE
+STARTUP_STALLED_TIME=1
+END_CLEAR=FALSE
+CHECK_PATH=TRUE
 ```
 
 ##  Version & Change Log
+
+<details>
+  <summary>0.075.8</summary>
+  
+  > Other BUG fixes 
+</details>
 
 <details>
   <summary>0.075.7</summary>
