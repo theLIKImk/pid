@@ -3,7 +3,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.7
+set PM_VER=0.075.8
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -17,7 +17,7 @@ SET PIDMD_CONFIG_LOADED=TRUE
 
 if not exist "%PIDMD_SYS%\PID\" mkdir "%PIDMD_SYS%\PID\"
 
-if "%LANG%"=="" set LANG=zh
+if "%PIDMD_LANG%"=="" set PIDMD_LANG=zh
 
 if "%PIDMD_CHCP_CODE%"=="" (chcp 936>nul) else (chcp %PIDMD_CHCP_CODE%>nul)
 if "%PIDMD_CMD_COLOR%"=="" (color 0F) else (color %PIDMD_CMD_COLOR%)
@@ -87,7 +87,7 @@ EXIT /B
 EXIT /B
 
 :SYSTEM_PID
-	IF /I NOT "%PIDMD_BOOT%"=="TRUE" ECHO NOT BOOT & EXIT /B
+	IF /I NOT "%PIDMD_BOOT%"=="TRUE"  EXIT /B
 	IF /I "%1"=="/SYSTEM_PID-PID" ECHO.%PIDMD_SYSTEM_PID% & EXIT /B
 	IF /I "%1"=="/SYSTEM_PID-STATUS" TYPE "%PIDMD_SYS%PID\SYSTEM_PID-%PIDMD_SYSTEM_PID%" & EXIT /B
 	
@@ -685,6 +685,8 @@ exit /b
 	
 	if "%PG_PID%"=="0" call logHE PIDMD ERRO -ERR-#sp#%3#sp#Create#sp#fail & popd & exit /b
 	
+	for /F  %%p in ('call pid.cmd /system_pid-pid') do SET SYSTEM_PID_RELY_ON=%%p
+	
 	if /i "%1"=="/run-SRV" (
 		call log.cmd PIDMD INFO --SRV--#sp#%2#SP#RUN#SP#in#SP#%PG_PID%
 		echo PID=%PG_PID%>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
@@ -694,7 +696,13 @@ exit /b
 		echo GROUP=SYS>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo SRV=%2>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo COMVAL=%4 %5 %6 %7 %8 %9>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
-		echo RELY_ON=SOLO>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+		
+		if "%SYSTEM_PID_RELY_ON%"=="" (
+			echo RELY_ON=SOLO>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+		) ELSE (
+			echo RELY_ON=%SYSTEM_PID_RELY_ON%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+		)
+		
 		echo %PG_PID%>"%PIDMD_SYS%SRVRUN\%2"
 	) else (
 		call log.cmd PIDMD INFO RUN#sp#%2#SP#in#SP#%PG_PID%
@@ -704,7 +712,11 @@ exit /b
 		echo USER=%PIDMD_USER%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo GROUP=SYS>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo COMVAL=%3 %4 %5 %6 %7 %8 %9>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
-		echo RELY_ON=SOLO>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+		if "%SYSTEM_PID_RELY_ON%"=="" (
+			echo RELY_ON=SOLO>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+		) ELSE (
+			echo RELY_ON=%SYSTEM_PID_RELY_ON%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+		)
 	)
 	
 	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% SOLO
