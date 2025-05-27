@@ -3,7 +3,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.8
+set PM_VER=0.075.9
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -546,6 +546,11 @@ exit /b
 		POPD
 	)
 	if "%2"=="" GOTO MAIN
+	
+	call config #PIDMD PIDMD/LANG %PIDMD_LANG%
+	call :LOG-INFO @Config version: %CONFIG_VERSION%
+	call pack
+	call :LOG-INFO @Pack version: %PACK_VER%
 	call log.cmd PIDMD INFO @Hello,%PIDMD_DEFAULT_USER%!
 	echo.
 	SET PIDMD_USER=%PIDMD_DEFAULT_USER%
@@ -983,3 +988,4 @@ exit /b
 	CALL log.cmd /clearlt
 	timeout 2 >nul
 	exit
+
