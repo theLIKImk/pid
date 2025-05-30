@@ -36,6 +36,9 @@ It can help you manage multiple BAT script windows
 | `call pid /srv-start <SRV:name>` | Start service |
 | `call pid /srv-stop <SRV:name>` | Stop service |
 | `call pid /srv-restart <SRV:name>` | Restart service |
+| `call pid /srv-enable <SRV:name>` | enable service startup |
+| `call pid /srv-disable <SRV:name>` | disable service startup |
+| `call pid /usr` | Set user |
 | `call pid /usr-list` | User list(`#PID.BAT DIR#\SYS\USER`) |
 | `call pid /usr-add <USERNAME>` | User added |
 | `call pid /usr-rmv <USERNAME>` | User delete |
@@ -97,6 +100,13 @@ CHECK_PATH=TRUE
 
 ##  Version & Change Log
 
+<details>
+  <summary>0.075.10</summary>
+
+  > Add `/srv-enable` <br>
+  > Add `/srv-disable` <br>
+  > Add `/usr`
+</details>
 
 <details>
   <summary>0.075.9</summary>
