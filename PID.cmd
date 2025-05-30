@@ -3,7 +3,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.9
+set PM_VER=0.075.10
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -57,6 +57,9 @@ if /i "%1"=="/srv-info" goto SRV
 if /i "%1"=="/srv-stop" goto SRV
 if /i "%1"=="/srv-start" goto SRV
 if /i "%1"=="/srv-restart" goto SRV
+if /i "%1"=="/srv-enable" goto SRV
+if /i "%1"=="/srv-disable" goto SRV
+if /i "%1"=="/usr" goto USR
 if /i "%1"=="/usr-add" goto USR
 if /i "%1"=="/usr-rmv" goto USR
 if /i "%1"=="/usr-list" goto USR
@@ -143,18 +146,25 @@ EXIT /B
 		cd /d "%PIDMD_ALLUSER%"
 		for /r %%f in (*) do echo.%%~nxf
 		POPD
+		exit /b
 	)
 	if /i "%1"=="/usr-add" (
 		IF EXIST "%PIDMD_ALLUSER%%2" ECHO User exist! & exit /b
 		echo.>"%PIDMD_ALLUSER%%2"
 		call log.cmd PIDMD INFO ADD#SP#%2#SP#USER
+		exit /b
 	)
 	if /i "%1"=="/usr-rmv" (
 		IF /i "%2"=="SYSTEM" ECHO Cant remove & exit /b
 		IF NOT EXIST "%PIDMD_ALLUSER%%2" ECHO User not exist! & exit /b
 		DEL "%PIDMD_ALLUSER%%2" >NUL
 		call log.cmd PIDMD INFO REMOVE#SP#%2#SP#USER
+		exit /b
 	)
+	
+	IF NOT EXIST "%PIDMD_ALLUSER%%2" ECHO User not exist! & exit /b
+	CALL CONFIG.cmd #PIDMD PIDMD/DEFAULT_USER %2
+	SET PIDMD_DEFAULT_USER=%2
 EXIT /B
 
 :version
@@ -183,6 +193,9 @@ exit /b
 	echo call pid /srv-start ^<SRV:name^>
 	echo call pid /srv-stop ^<SRV:name^>
 	echo call pid /srv-restart ^<SRV:name^>
+	echo call pid /srv-enable ^<SRV:name^>
+	echo call pid /srv-disable ^<SRV:name^>
+	echo call pid /usr ^<USERNAME^>
 	echo call pid /usr-list
 	echo call pid /usr-add ^<USERNAME^>
 	echo call pid /usr-rmv ^<USERNAME^>
@@ -300,6 +313,19 @@ goto :eof
 	if /i "%1"=="/srv-start" call :SRV_START
 	if /i "%1"=="/srv-stop" call :SRV_STOP
 	if /i "%1"=="/srv-restart" call :SRV_RESTART
+	if /i "%1"=="/srv-enable" call :SRV_ENABLE
+	if /i "%1"=="/srv-disable" call :SRV_DISABLE
+EXIT /B
+
+:SRV_DISABLE
+	CALL :LOG-INFO DISABLE %SRV_NAME%
+	CALL CONFIG.cmd #SRV %SRV_NAME% STARTUP FALSE
+EXIT /B
+
+
+:SRV_ENABLE
+	CALL :LOG-INFO ENABLE %SRV_NAME%
+	CALL CONFIG.cmd #SRV %SRV_NAME% STARTUP TRUE
 EXIT /B
 
 :SRV_RESTART
@@ -988,4 +1014,5 @@ exit /b
 	CALL log.cmd /clearlt
 	timeout 2 >nul
 	exit
+
 
