@@ -3,7 +3,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.10
+set PM_VER=0.075.11
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -895,13 +895,21 @@ exit /b 0
 	echo %PG_PID% %PG_NAME% %PID_TYPE%
 	call log.cmd PIDMD INFO PC-%PG_PID%,RUN:%PG_PID%,NAME:%PG_NAME%,TYPE:%PID_TYPE%
 	:check_pid_looop
-		
+
 		if /i not "%PID_RELY_ON%"=="SOLO" (
 			IF NOT EXIST "%PIDMD_ROOT%SYS\PID\*-%PID_RELY_ON%" (
 				start hiderun call PID.cmd /killpid-f %PG_PID%
 				exit /b
 			)
 		)
+		
+		if DEFINED PIDMD_RELY_ON (
+			IF NOT EXIST "%PIDMD_ROOT%SYS\PID\*-%PIDMD_RELY_ON%" (
+				start hiderun call PID.cmd /killpid-f %PG_PID%
+				exit /b
+			)
+		)
+		
 		
 		echo [FILE]
 		if not exist "%PIDMD_SYS%PID\*-%2" (
@@ -926,6 +934,7 @@ exit /b 0
 				start hiderun call PID.cmd /killpid %PG_PID%
 			)
 		)
+		
 		timeout 1 >nul
 	goto check_pid_looop
 exit
@@ -1014,5 +1023,6 @@ exit /b
 	CALL log.cmd /clearlt
 	timeout 2 >nul
 	exit
+
 
 
