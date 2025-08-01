@@ -101,6 +101,12 @@ CHECK_PATH=TRUE
 ##  Version & Change Log
 
 <details>
+  <summary>0.075.11</summary>
+
+  > Add `%PIDMD_RELY_ON%` <br>
+</details>
+
+<details>
   <summary>0.075.10</summary>
 
   > Add `/srv-enable` <br>
