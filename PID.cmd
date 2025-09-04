@@ -1,9 +1,10 @@
 @echo off
+REM Waring: MUST USE ANSI!
 PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.11
+set PM_VER=0.075.13
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -16,6 +17,7 @@ IF /I NOT "%PIDMD_CONFIG_LOADED%"=="TRUE" call loadcfg "%~dp0system.ini"
 SET PIDMD_CONFIG_LOADED=TRUE
 
 if not exist "%PIDMD_SYS%\PID\" mkdir "%PIDMD_SYS%\PID\"
+if not exist "%PIDMD_SYS%\PRID" mkdir "%PIDMD_SYS%\PRID\"
 
 if "%PIDMD_LANG%"=="" set PIDMD_LANG=zh
 
@@ -651,6 +653,7 @@ exit /b
 		call log.cmd PIDMD ERRO %2#SP#Not#SP#exist
 		if exist "%PIDMD_SYS%PID\*-%2" call log.cmd PIDMD ERRO -RMV-#SP#Clear#SP#PID#SP#file &del "%PIDMD_SYS%PID\*-%2"
 		IF DEFINED SRV call log.cmd PIDMD ERRO -RMV-#SP#Clear#SP#%SRV%#SP#file & del /F /S /Q "%PIDMD_SYS%\SRVRUN\%SRV%"
+		del "%PIDMD_SYS%PRID\%PIDMD_PRID%" >nul
 		exit /b
 	)
 	
@@ -675,6 +678,7 @@ exit /b
 	if /i "%TYPE%"=="SRV" del /F /S /Q "%PIDMD_SYS%\SRVRUN\%SRV%"
 	IF DEFINED SRV del /F /S /Q "%PIDMD_SYS%\SRVRUN\%SRV%"
 	del "%PIDMD_SYS%PID\*-%2" >nul
+	del "%PIDMD_SYS%PRID\%PIDMD_PRID%" >nul
 	call log.cmd PIDMD INFO END#sp#PID#sp#%2#sp#[%PID_TYPE%]
 exit /b
 
@@ -705,6 +709,9 @@ exit /b
 		)
 	)
 	
+	::prid 生成
+	set PIDMD_PRID=%random:~-1%%random:~-1%%random:~-1%%random:~-1%-%random:~-1%%random:~-1%%random:~-1%%random:~-1%-%random:~-1%%random:~-1%%random:~-1%%random:~-1%-%random:~-1%%random:~-1%%random:~-1%%random:~-1%
+	
 	if /i "%1"=="/run-SRV" (cpretpid %3 %4 %5 %6 %7 %8 %9>NUL) else (cpretpid %2 %3 %4 %5 %6 %7 %8 %9>NUL)
 	
 	set PG_PID=%errorlevel%
@@ -715,6 +722,9 @@ exit /b
 	set PG_NAME=%PG_NAME::=#CL#%
 	
 	if "%PG_PID%"=="0" call logHE PIDMD ERRO -ERR-#sp#%3#sp#Create#sp#fail & popd & exit /b
+	
+	::prid 写入
+	echo %PG_PID%>"%PIDMD_SYS%PRID\%PIDMD_PRID%"
 	
 	for /F  %%p in ('call pid.cmd /system_pid-pid') do SET SYSTEM_PID_RELY_ON=%%p
 	
@@ -752,6 +762,7 @@ exit /b
 	
 	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% SOLO
 	popd
+	
 exit /b %PG_PID%
 
 
@@ -782,7 +793,10 @@ exit /b %PG_PID%
 			exit /b
 		)
 	)
-	
+
+	::prid 生成
+	set PIDMD_PRID=%random:~-1%%random:~-1%%random:~-1%%random:~-1%-%random:~-1%%random:~-1%%random:~-1%%random:~-1%-%random:~-1%%random:~-1%%random:~-1%%random:~-1%-%random:~-1%%random:~-1%%random:~-1%%random:~-1%
+
 	if DEFINED PID_START_PATH_SET (cpretpid %PID_START_PATH_SET%) else 	(
 		if not "%3"=="" (cpretpid %3 %4 %5 %6 %7 %8 %9) else (CALL :LOG-ERRO Path not set & exit /b -1)
 	)
@@ -797,6 +811,10 @@ exit /b %PG_PID%
 	IF /I "%1"=="/START-SYSTEM" SET PID_TYPE=SYSTEM
 	
 	if "%PG_PID%"=="0" CALL :LOG-ERRO Create fail & exit /b -1
+	
+	::prid 写入
+	echo %PG_PID%>"%PIDMD_SYS%PRID\%PIDMD_PRID%"
+	
 	
 	goto SET_PID_FILE
 
