@@ -4,7 +4,7 @@ It can help you manage multiple BAT script windows
 
 > [!TIP]
 > Do not include half-width spaces and parentheses in the path  
-> 路径中不要包含半角空格和括号  
+> 路径中不要包含半角空格和括号
 
 > [!WARNING]
 > This script cannot obtain the same running results on multiple computers, please pay attention to ensure the security of your data!  
@@ -99,6 +99,13 @@ CHECK_PATH=TRUE
 ```
 
 ##  Version & Change Log
+
+<details>
+  <summary>0.075.13</summary>
+
+  > Added `PIDMD_RELY_ON`, Conveniently set up the main monitoring program <br>
+  > Added `%PIDMD_PRID%`, Easy to find PID <br>
+</details>
 
 <details>
   <summary>0.075.11</summary>
