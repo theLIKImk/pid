@@ -4,7 +4,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.13
+set PM_VER=0.075.14
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -760,7 +760,7 @@ exit /b
 		)
 	)
 	
-	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% SOLO
+	start cmd /c hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% SOLO
 	popd
 	
 exit /b %PG_PID%
@@ -837,7 +837,7 @@ exit /b %PG_PID%
 	
 	IF /I "%PID_TYPE%"=="SRV" ECHO.%PG_PID%>"%PIDMD_SYS%SRVRUN\%SRV%"
 	
-	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% %PID_RELY_ON%
+	start cmd /c  hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% %PID_RELY_ON%
 	
 	set PID_START_PATH_SET=
 	SET PID_RUN_PATH_SET=
@@ -1041,6 +1041,7 @@ exit /b
 	CALL log.cmd /clearlt
 	timeout 2 >nul
 	exit
+
 
 
 
