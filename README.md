@@ -101,6 +101,12 @@ CHECK_PATH=TRUE
 ##  Version & Change Log
 
 <details>
+  <summary>0.075.14</summary>
+
+  > Fix bugs......
+</details>
+
+<details>
   <summary>0.075.13</summary>
 
   > Added `PIDMD_RELY_ON`, Conveniently set up the main monitoring program <br>
