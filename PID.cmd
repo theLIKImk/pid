@@ -4,7 +4,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.14
+set PM_VER=0.075.15
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -760,7 +760,7 @@ exit /b
 		)
 	)
 	
-	start cmd /c hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% SOLO
+	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% SOLO
 	popd
 	
 exit /b %PG_PID%
@@ -837,7 +837,7 @@ exit /b %PG_PID%
 	
 	IF /I "%PID_TYPE%"=="SRV" ECHO.%PG_PID%>"%PIDMD_SYS%SRVRUN\%SRV%"
 	
-	start cmd /c  hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% %PID_RELY_ON%
+	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% %PID_RELY_ON%
 	
 	set PID_START_PATH_SET=
 	SET PID_RUN_PATH_SET=
@@ -916,14 +916,14 @@ exit /b 0
 
 		if /i not "%PID_RELY_ON%"=="SOLO" (
 			IF NOT EXIST "%PIDMD_ROOT%SYS\PID\*-%PID_RELY_ON%" (
-				start hiderun call PID.cmd /killpid-f %PG_PID%
+				start cmd /c "hiderun call PID.cmd /killpid-f %PG_PID%"
 				exit /b
 			)
 		)
 		
 		if DEFINED PIDMD_RELY_ON (
 			IF NOT EXIST "%PIDMD_ROOT%SYS\PID\*-%PIDMD_RELY_ON%" (
-				start hiderun call PID.cmd /killpid-f %PG_PID%
+				start cmd /c "hiderun call PID.cmd /killpid-f %PG_PID%"
 				exit /b
 			)
 		)
@@ -932,7 +932,7 @@ exit /b 0
 		echo [FILE]
 		if not exist "%PIDMD_SYS%PID\*-%2" (
 			call log.cmd PIDMD INFO PC-%PG_PID%,FILE#SP#END,GOOD#SP#BEY
-			start hiderun call PID.cmd /killpid-f %PG_PID%
+			start cmd /c "hiderun call PID.cmd /killpid-f %PG_PID%"
 			exit
 		)
 		
@@ -940,7 +940,7 @@ exit /b 0
 		call :exist_pid %2
 		if "%errorlevel%"=="1" (
 			call log.cmd PIDMD INFO PC-%PG_PID%,PID#SP#END,GOOD#SP#BEY
-			start hiderun call PID.cmd /killpid %PG_PID%
+			start cmd /c "hiderun call PID.cmd /killpid-f %PG_PID%"
 			exit
 		)
 		
@@ -949,7 +949,7 @@ exit /b 0
 			echo %SRV%
 			IF NOT exist "%PIDMD_SYS%SRVRUN\%SRV%" (
 				call log.cmd PIDMD INFO PC-%PG_PID%-DOWN SRV#SP#END,GOOD#SP#BEY
-				start hiderun call PID.cmd /killpid %PG_PID%
+				start cmd /c "hiderun call PID.cmd /killpid-f %PG_PID%"
 			)
 		)
 		
@@ -964,13 +964,13 @@ exit
 	:check_sys_loop
 		if not exist "%PIDMD_SYS%PID\*-%SYS_PID%" (
 			call log.cmd PIDMD DOWN ---SYS--END---
-			start hiderun %~dp0pid.cmd /sys_end
+			start cmd /c " hiderun %~dp0pid.cmd /sys_end"
 			exit
 		)
 		call :exist_pid %SYS_PID%
 		if "%errorlevel%"=="1" (
 			call log.cmd PIDMD DOWN ---SYS--END---
-			start hiderun %~dp0pid.cmd /sys_end
+			start cmd /c "hiderun %~dp0pid.cmd /sys_end"
 			exit
 		)
 	goto check_sys_loop
@@ -1003,7 +1003,9 @@ exit /b
 	SET PIDMD_USER=SYSTEM
 	if "%SYS_PID%"=="" call :sys_get_pid
 	if "%SYS_PID%"=="" echo Not found SYSTEM_PID. Noting to end. & pause & SET PIDMD_USER=%bfuser% & exit /b
-
+	
+	title PID END
+	
 	cd /d "%PIDMD_TMP%"
 	echo.>"%PIDMD_TMP%PIDMD-END"
 	timeout 2 >nul
@@ -1013,7 +1015,7 @@ exit /b
 	cd /d "%PIDMD_SYS%SRVRUN\"
 	for /r %%f in (*) do (
 		call log.cmd PIDMD DOWN ---#sp#STOP#sp#SRV#sp#%%~nxf#sp#---
-		start hiderun call pid.cmd /srv-stop %%~nxf
+		start cmd /c "hiderun call pid.cmd /srv-stop %%~nxf"
 	)
 	
 	call log.cmd PIDMD DOWN --END#sp#PG--
@@ -1040,8 +1042,8 @@ exit /b
 	call log.cmd PIDMD DOWN --BEY--
 	CALL log.cmd /clearlt
 	timeout 2 >nul
+	title
 	exit
-
 
 
 
