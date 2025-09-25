@@ -101,6 +101,12 @@ CHECK_PATH=TRUE
 ##  Version & Change Log
 
 <details>
+  <summary>0.075.15</summary>
+
+  > `PIDMD_END_CLEAR` can use 
+</details>
+
+<details>
   <summary>0.075.14</summary>
 
   > Fix bugs......
