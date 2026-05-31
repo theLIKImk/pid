@@ -57,6 +57,12 @@ It can help you manage multiple BAT script windows
 | `call pid /about` | About |
 | `call pid /about-gpl` | GPL 3.0 |
 
+## ENV
+| Set | info |
+| -------------- | ------------------------ |
+| `PID_START_PATH_SET` | Set program path befor use `PID.cmd /run`/`PID.cmd /start` |
+| `PIDMD_RELY_ON` | Set this program rely on pid |
+
 ## .srv File `#PID.BAT DIR#\SYS\SRV`
 ```
 NAME=<Service name>
@@ -96,9 +102,17 @@ STARTUP_STALLED=TRUE
 STARTUP_STALLED_TIME=1
 END_CLEAR=FALSE
 CHECK_PATH=TRUE
+CHECK_TIME=1
 ```
 
 ##  Version & Change Log
+
+<details>
+  <summary>0.075.16</summary>
+
+  > windows terminal support  
+  > add `PIDMD_CHECK_TIME`
+</details>
 
 <details>
   <summary>0.075.15</summary>
