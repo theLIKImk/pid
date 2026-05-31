@@ -4,7 +4,7 @@ PUSHD %cd%
 ::cd /d %~dp0
 
 set PATH=%PATH%;%~dp0
-set PM_VER=0.075.15
+set PM_VER=0.075.16
 set PM_INFO=PID VER %PM_VER%
 set PIDMD_DISABLE_RUN=false
 
@@ -28,6 +28,7 @@ if "%PIDMD_CMD_COLOR%"=="" (color 0F) else (color %PIDMD_CMD_COLOR%)
 set en_check_pid_info=INFO:
 set zh_check_pid_info=信息:
 set zh_use_arg_error_1=不是内部或外部命令，也不是可运行的程序
+echo.>nul
 set zh_use_arg_error_2=或批处理文件。
 set en_use_arg_error_1=is not recognized as an internal or external command,
 set en_use_arg_error_2=operable program or batch file.
@@ -44,7 +45,7 @@ if /i "%1"=="/run-SYSTEM" goto run
 if /i "%1"=="/run-SRV" goto run
 if /i "%1"=="/check_pid" goto check_pid
 if /i "%1"=="/check_sys" goto check_sys
-if /i "%1"=="/exist-pid" goto exist_pid
+if /i "%1"=="/exist_pid" goto exist_pid
 if /i "%1"=="/killpid" goto kill
 if /i "%1"=="/killpid-f" goto kill
 if /i "%1"=="/list" goto list
@@ -249,17 +250,17 @@ exit /b
 		echo exit /b>>"%~dp0start.bat"
 	)
 	
-	if not exist "%~dp0cpretpid.exe" (
-		title Dowlnoad cpretpid.exe......
-		call log.cmd PIDMD INFO --DOWNLOAD#SP#^|#SP#cpretpid.exe--
-		bitsadmin /transfer cpretpid /download /priority normal http://bcn.bathome.net/tool/cpretpid.exe "%~dp0\cpretpid.exe"
-	)
+	::if not exist "%~dp0cpretpid.exe" (
+	::	title Dowlnoad cpretpid.exe......
+	::	call log.cmd PIDMD INFO --DOWNLOAD#SP#^|#SP#cpretpid.exe--
+	::	bitsadmin /transfer cpretpid /download /priority normal http://bcn.bathome.net/tool/cpretpid.exe "%~dp0\cpretpid.exe"
+	::)
 
-	if not exist "%~dp0hidecon.exe" (
-		title Dowlnoad hidecon.exe......
-		call log.cmd PIDMD INFO --DOWNLOAD#SP#^|#SP#hidecon.exe--
-		bitsadmin /transfer hidecon /download /priority normal http://bcn.bathome.net/tool/hidecon.exe "%~dp0\hidecon.exe"
-	)
+	::if not exist "%~dp0hidecon.exe" (
+	::	title Dowlnoad hidecon.exe......
+	::	call log.cmd PIDMD INFO --DOWNLOAD#SP#^|#SP#hidecon.exe--
+	::	bitsadmin /transfer hidecon /download /priority normal http://bcn.bathome.net/tool/hidecon.exe "%~dp0\hidecon.exe"
+	::)
 	
 	if not exist "%~dp0log.cmd" (
 		call log.cmd PIDMD INFO CREATE:log.cmd
@@ -291,9 +292,11 @@ exit /b
 		echo GLOBAL_CMD=>>"%~dp0system.ini"
 		echo DISABLE_RUN=false>>"%~dp0system.ini"
 		echo STARTUP_STALLED=FALSE>>"%~dp0system.ini"
+		echo.>nul
 		echo STARTUP_STALLED_TIME=5>>"%~dp0system.ini"
 		echo END_CLEAR=FALSE>>"%~dp0system.ini"
 		echo CHECK_PATH=TRUE>>"%~dp0system.ini"
+		echo CHECK_TIME=1>>"%~dp0system.ini"
 	)
 
 goto :eof
@@ -369,7 +372,7 @@ EXIT /B
 	call log.cmd PIDMD INFO Run#SP#SRV#SP#%SRV_NAME%
 	call loadcfg "%PIDMD_SYS%SRV\%SRV_NAME%"
 	SET PID_START_PATH_SET=%CMD%
-	start hiderun PID.CMD /start-SRV SOLO %SRV_NAME%
+	hidew --run "PID.CMD /start-SRV SOLO %SRV_NAME%"
 EXIT /B
 
 :SRV_INFO
@@ -531,7 +534,7 @@ EXIT /B
 	
 	set PIDMD_BOOT=true
 	set PIDMD_USER=SYSTEM
-	cpretpid PID.cmd /startup %2
+	getpid PID.cmd /startup %2
 	set PG_PID=%errorlevel%
 	
 	if "%PG_PID%"=="0" call log.cmd PIDMD BOOT -WAR-#SP#PID#SP#is#SP#0
@@ -543,7 +546,7 @@ EXIT /B
 	echo GROUP=SYS>>"%PIDMD_SYS%PID\SYSTEM_PID-%PG_PID%"
 	echo COMVAL=PID.cmd>>"%PIDMD_SYS%PID\SYSTEM_PID-%PG_PID%"
 	
-	start hiderun PID.cmd /check_sys %PG_PID%
+	hidew --run "PID.cmd /check_sys %PG_PID%"
 exit
 
 :startup-getpidmdInfo
@@ -597,7 +600,7 @@ goto main
 		if /i "%USE%"=="TRUE" (
 			REM call log.cmd PIDMD INFO [%NAME%]--%TYPE%--#SP#SRV#SP#RUN
 			REM start hiderun PID.cmd /RUN-SRV %1 %CMD%
-			start hiderun PID /srv-start %1
+			hidew --run "PID.cmd /srv-start %1"
 			call log.cmd PIDMD INFO #sp#-#sp##sp#SRV#sp#:#sp#%1#sp#[START]
 		) else (
 			call log.cmd PIDMD INFO #sp#-#sp##sp#SRV#sp#:#sp#%1#sp#[DISBLE]
@@ -712,7 +715,7 @@ exit /b
 	::prid 生成
 	set PIDMD_PRID=%random:~-1%%random:~-1%%random:~-1%%random:~-1%-%random:~-1%%random:~-1%%random:~-1%%random:~-1%-%random:~-1%%random:~-1%%random:~-1%%random:~-1%-%random:~-1%%random:~-1%%random:~-1%%random:~-1%
 	
-	if /i "%1"=="/run-SRV" (cpretpid %3 %4 %5 %6 %7 %8 %9>NUL) else (cpretpid %2 %3 %4 %5 %6 %7 %8 %9>NUL)
+	if /i "%1"=="/run-SRV" (getpid %3 %4 %5 %6 %7 %8 %9>NUL) else (getpid %2 %3 %4 %5 %6 %7 %8 %9>NUL)
 	
 	set PG_PID=%errorlevel%
 	set PG_NAME=%2
@@ -734,6 +737,7 @@ exit /b
 		echo NAME=%3>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo TYPE=SRV>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo USER=%PIDMD_USER%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+		echo PRID=%PIDMD_PRID%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo GROUP=SYS>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo SRV=%2>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo COMVAL=%4 %5 %6 %7 %8 %9>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
@@ -751,6 +755,7 @@ exit /b
 		echo NAME=%2>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo TYPE=%PID_TYPE%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo USER=%PIDMD_USER%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+		echo PRID=%PIDMD_PRID%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo GROUP=SYS>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		echo COMVAL=%3 %4 %5 %6 %7 %8 %9>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 		if "%SYSTEM_PID_RELY_ON%"=="" (
@@ -760,7 +765,7 @@ exit /b
 		)
 	)
 	
-	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% SOLO
+	hidew --run "PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% SOLO"
 	popd
 	
 exit /b %PG_PID%
@@ -797,8 +802,8 @@ exit /b %PG_PID%
 	::prid 生成
 	set PIDMD_PRID=%random:~-1%%random:~-1%%random:~-1%%random:~-1%-%random:~-1%%random:~-1%%random:~-1%%random:~-1%-%random:~-1%%random:~-1%%random:~-1%%random:~-1%-%random:~-1%%random:~-1%%random:~-1%%random:~-1%
 
-	if DEFINED PID_START_PATH_SET (cpretpid %PID_START_PATH_SET%) else 	(
-		if not "%3"=="" (cpretpid %3 %4 %5 %6 %7 %8 %9) else (CALL :LOG-ERRO Path not set & exit /b -1)
+	if DEFINED PID_START_PATH_SET (getpid %PID_START_PATH_SET%) else 	(
+		if not "%3"=="" (getpid %3 %4 %5 %6 %7 %8 %9) else (CALL :LOG-ERRO Path not set & exit /b -1)
 	)
 
 	set PG_PID=%errorlevel%
@@ -823,6 +828,7 @@ exit /b %PG_PID%
 	echo NAME=%3>>"%PIDMD_ROOT%SYS\PID\%3-%PG_PID%"
 	echo TYPE=%PID_TYPE%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 	echo USER=%PIDMD_USER%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
+	echo PRID=%PIDMD_PRID%>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 	
 	echo GROUP=SYS>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
 	IF /I "%1"=="/START-SRV" echo SRV=%3>>"%PIDMD_SYS%PID\%PG_NAME%-%PG_PID%"
@@ -837,11 +843,12 @@ exit /b %PG_PID%
 	
 	IF /I "%PID_TYPE%"=="SRV" ECHO.%PG_PID%>"%PIDMD_SYS%SRVRUN\%SRV%"
 	
-	start hiderun PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% %PID_RELY_ON%
+	hidew --run "PID.cmd /check_pid %PG_PID% %PG_NAME% %PID_TYPE% %PID_RELY_ON%"
 	
 	set PID_START_PATH_SET=
 	SET PID_RUN_PATH_SET=
 	
+	exit /b %PG_PID%
 	exit /b %PG_PID%
 
 :LOGHE-INFO
@@ -888,7 +895,8 @@ EXIT /B
 
 :exist_pid
 ::call :exist_pid [PID]
-	FOR /F %%s in ('TASKLIST /FI "PID eq %1"') do set cmdput=%%s
+	if /i "%1"=="/exist_pid" (set _exist_pid=%2) else (set _exist_pid=%1)
+	FOR /F %%s in ('TASKLIST /FI "PID eq %_exist_pid%"') do set cmdput=%%s
 	if /i "%PIDMD_LANG%"=="zh" (
 		if "%cmdput%"=="%zh_check_pid_info%" exit /b 1
 	)
@@ -916,14 +924,14 @@ exit /b 0
 
 		if /i not "%PID_RELY_ON%"=="SOLO" (
 			IF NOT EXIST "%PIDMD_ROOT%SYS\PID\*-%PID_RELY_ON%" (
-				start cmd /c "hiderun call PID.cmd /killpid-f %PG_PID%"
+				hidew --run "PID.cmd /killpid-f %PG_PID%"
 				exit /b
 			)
 		)
 		
 		if DEFINED PIDMD_RELY_ON (
 			IF NOT EXIST "%PIDMD_ROOT%SYS\PID\*-%PIDMD_RELY_ON%" (
-				start cmd /c "hiderun call PID.cmd /killpid-f %PG_PID%"
+				hidew --run "PID.cmd /killpid-f %PG_PID%"
 				exit /b
 			)
 		)
@@ -932,7 +940,7 @@ exit /b 0
 		echo [FILE]
 		if not exist "%PIDMD_SYS%PID\*-%2" (
 			call log.cmd PIDMD INFO PC-%PG_PID%,FILE#SP#END,GOOD#SP#BEY
-			start cmd /c "hiderun call PID.cmd /killpid-f %PG_PID%"
+			hidew --run "PID.cmd /killpid-f %PG_PID%"
 			exit
 		)
 		
@@ -940,7 +948,7 @@ exit /b 0
 		call :exist_pid %2
 		if "%errorlevel%"=="1" (
 			call log.cmd PIDMD INFO PC-%PG_PID%,PID#SP#END,GOOD#SP#BEY
-			start cmd /c "hiderun call PID.cmd /killpid-f %PG_PID%"
+			hidew --run "PID.cmd /killpid-f %PG_PID%"
 			exit
 		)
 		
@@ -949,11 +957,11 @@ exit /b 0
 			echo %SRV%
 			IF NOT exist "%PIDMD_SYS%SRVRUN\%SRV%" (
 				call log.cmd PIDMD INFO PC-%PG_PID%-DOWN SRV#SP#END,GOOD#SP#BEY
-				start cmd /c "hiderun call PID.cmd /killpid-f %PG_PID%"
+				hidew --run "PID.cmd /killpid-f %PG_PID%"
 			)
 		)
 		
-		timeout 1 >nul
+		timeout %PIDMD_CHECK_TIME% >nul
 	goto check_pid_looop
 exit
 	
@@ -964,13 +972,13 @@ exit
 	:check_sys_loop
 		if not exist "%PIDMD_SYS%PID\*-%SYS_PID%" (
 			call log.cmd PIDMD DOWN ---SYS--END---
-			start cmd /c " hiderun %~dp0pid.cmd /sys_end"
+			hidew --run "%~dp0pid.cmd /sys_end"
 			exit
 		)
 		call :exist_pid %SYS_PID%
 		if "%errorlevel%"=="1" (
 			call log.cmd PIDMD DOWN ---SYS--END---
-			start cmd /c "hiderun %~dp0pid.cmd /sys_end"
+			hidew --run "%~dp0pid.cmd /sys_end"
 			exit
 		)
 	goto check_sys_loop
@@ -979,7 +987,7 @@ exit
 	call loadcfg %1
 	if /i "%TYPE%"=="SYSTEM" exit /b
 	call log.cmd PIDMD DOWN --PG:%NAME%^|%PID%#sp#END--
-	start hiderun call PID.cmd /killpid-f %PID%
+	hidew --run "PID.cmd /killpid-f %PID%"
 exit /b
 
 :sys_get_pid
@@ -1015,14 +1023,14 @@ exit /b
 	cd /d "%PIDMD_SYS%SRVRUN\"
 	for /r %%f in (*) do (
 		call log.cmd PIDMD DOWN ---#sp#STOP#sp#SRV#sp#%%~nxf#sp#---
-		start cmd /c "hiderun call pid.cmd /srv-stop %%~nxf"
+		hidew --run "pid.cmd /srv-stop %%~nxf"
 	)
 	
 	call log.cmd PIDMD DOWN --END#sp#PG--
 	cd /d "%PIDMD_SYS%PID\"
 	for /r %%f in (*) do call :sys_end_kill %%f
 	
-	start hiderun call PID.cmd /killpid-f %SYS_PID%
+	hidew --run "PID.cmd /killpid-f %SYS_PID%"
 	
 	IF /i "%PIDMD_END_CLEAR%"=="false" goto :SYS_END-out
 	
