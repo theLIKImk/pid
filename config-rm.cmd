@@ -1,5 +1,5 @@
 @echo off
-SET CONFIG_VERSION=0.9.0
+SET CONFIG_VERSION=0.10.0
 
 IF "%PIDMD_ROOT%"=="" CALL :LOG-ERRO EVN ERROR! & exit /b
 
@@ -25,21 +25,25 @@ REM echo.%CONFIG_CONFIG_BLK%
 SET CONFIG_CENTER_FILE=%CONFIG_CONFIG_FILEPATH%
 
 IF "%CONFIG_CONFIG_KEY%"=="#NONE" (
-	call ccs.bat /blk-rm %CONFIG_CONFIG_BLK%
+	CALL ccs.bat /send /blk-rm %CONFIG_CONFIG_BLK%
 	GOTO :CONFIG-END
 )
 
 IF /i NOT "%CONFIG_CONFIG_BLK%"=="#NONE" (
-	call ccs.bat /key-nblk-rm %CONFIG_CONFIG_KEY%
+	CALL ccs.bat /send /key-nblk-rm %CONFIG_CONFIG_KEY%
 	GOTO :CONFIG-END
 )
 
-CALL ccs.bat /key-rm %CONFIG_CONFIG_BLK% %CONFIG_CONFIG_KEY%
+CALL ccs.bat /send /key-rm %CONFIG_CONFIG_BLK% %CONFIG_CONFIG_KEY%
 
 
 :CONFIG-END
 SET CONFIG_CENTER_FILE=
 SET CONFIG_CONFIG_FILEPATH=
+SET CONFIG_CONFIG_BLK=
+SET CONFIG_CONFIG_KEY=
+SET CONFIG_CONFIG_KEY_VAL=
+SET CONFIG_CONFIG_PATH=
 EXIT /B
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
