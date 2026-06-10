@@ -1,6 +1,6 @@
 @echo off
 
-set CONFIG_CENTER_VERSION=1.2.3
+set CONFIG_CENTER_VERSION=1.2.4
 set CONFIG_CENTER_QUEUE=%~dp0TMP\ccs_queue\
 
 IF "%CONFIG_CENTER_FILE%"=="" (set CONFIG_CENTER_FILE=%~dp0system.ini) ELSE (
@@ -38,8 +38,9 @@ if /i "%1"=="/key-nblk-changeval" goto :key_nblk_change
 if /i "%1"=="/key-nblk-add" goto :key_nblk_add
 if /i "%1"=="/key-nblk-rm" goto :key_nblk_rm
 if /i "%1"=="/send" echo.%2 %3 %4 %5 %6 %7 %8 %9>%CONFIG_CENTER_QUEUE%\%random%
-if /i "%1"=="/server" setlocal EnableDelayedExpansion & call log.cmd CCS INFO ON & goto :server
-if /i "%1"=="/server-hide" hidecon & setlocal EnableDelayedExpansion & call log.cmd CCS INFO ON  & goto :server
+if /i "%1"=="/server" call log.cmd CCS INFO ON & goto :server
+REM if /i "%1"=="/server-hide" call hiderun & call log.cmd CCS INFO ON & goto :server
+if /i "%1"=="/server-hide" hidew --run-wait "ccs.bat /server"
 if /i "%1"=="/server-stop" call log.cmd CCS INFO OFF & goto :server
 if /i "%1"=="/version" goto :version
 
@@ -84,6 +85,8 @@ exit /b 0
 exit /b %CONFIG_CENTER_VERSION%
 
 :server  
+	setlocal EnableDelayedExpansion 
+:server-loop
 	if /i "%1"=="/server-stop" echo.stopserver>%CONFIG_CENTER_QUEUE%stopserver & exit /b 0
 	
 	if exist "%CONFIG_CENTER_QUEUE%stopserver" (
@@ -94,10 +97,12 @@ exit /b %CONFIG_CENTER_VERSION%
 	
 	for /r "%CONFIG_CENTER_QUEUE%" %%f in (*) do (
 		set /p cmd=<%%f
-		start "" cmd /c "ccs.bat !cmd! & exit"
+		call log.cmd CCS INFO [%%~nf]#SP#!cmd: =#SP#!
+		call :LOG
+		hidew --run "ccs.bat !cmd!"
 		del %%f
 	) 
-goto server
+goto :server-loop
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
